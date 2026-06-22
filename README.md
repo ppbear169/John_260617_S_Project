@@ -42,3 +42,5 @@ http://localhost:5173
 ```
 
 ### 4. 根目录下有个演示视频
+
+https://github.com/ppbear169/John_260617_S_Project/blob/main/Screen%20Recording%202026-06-22%20at%201.22.31%E2%80%AFPM.mov
