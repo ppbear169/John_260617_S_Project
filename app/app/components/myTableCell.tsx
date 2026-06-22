@@ -1,4 +1,4 @@
-import { Form, Input, type InputRef } from 'antd';
+import { Form, Input, Select, type InputRef } from 'antd';
 import type { MyTypeSchema } from 'datalayer';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { EditableContext, Errors, type ErrorsType } from '../utils';
@@ -9,7 +9,11 @@ interface EditableCellProps {
   dataIndex: keyof MyTypeSchema;
   record: MyTypeSchema;
   handleSave: (record: MyTypeSchema) => void;
-  handleValidate: (record: MyTypeSchema) => ErrorsType;
+  handleValidate: (
+    dataIndex: keyof MyTypeSchema,
+    prevValue: string | number | boolean | undefined,
+    record: MyTypeSchema,
+  ) => ErrorsType;
 }
 
 export const EditableCell: React.FC<
@@ -28,11 +32,12 @@ export const EditableCell: React.FC<
   const inputRef = useRef<InputRef>(null);
   const form = useContext(EditableContext)!;
   const previousValue = record ? record[dataIndex] : '';
-  const [error, setError] = useState(Errors.noError);
+  const [error, setError] = useState<ErrorsType>(Errors.noError);
 
   useEffect(() => {
     if (editing) {
       inputRef.current?.focus();
+      setError(Errors.noError);
     }
   }, [editing]);
 
@@ -43,21 +48,22 @@ export const EditableCell: React.FC<
 
   const save = async () => {
     try {
-      const values = await form.validateFields();
-      // const validateResult = handleValidate(
-      //   values[dataIndex],
-      //   previousValue,
-      //   record,
-      // );
-
-      // switch (validateResult) {
-      //   case Errors.repeated:
-      //     setError();
-      //     return;
-      //   default:
-      //     setError(Errors.noError);
-      //     break;
-      // }
+      let values = await form.validateFields();
+      if (dataIndex === 'dataType' && values[dataIndex] !== previousValue) {
+        values = {
+          ...values,
+          defaultValue: values[dataIndex] === 'INT' ? 0 : true,
+        };
+      }
+      const validateResult = handleValidate(dataIndex, previousValue, {
+        ...record,
+        ...values,
+      });
+      console.log('validateResult', validateResult);
+      if (validateResult !== Errors.noError) {
+        setError(validateResult);
+        return;
+      }
 
       toggleEdit();
       handleSave({ ...record, ...values });
@@ -74,14 +80,22 @@ export const EditableCell: React.FC<
         style={{ margin: 0 }}
         name={dataIndex}
         validateStatus={error !== Errors.noError ? 'error' : undefined}
-        help={error !== Errors.noError ? error : undefined}
+        help={error !== Errors.noError ? `${title} ${error}` : undefined}
       >
-        <Input
-          ref={inputRef}
-          onPressEnter={save}
-          onBlur={save}
-          autoComplete="off"
-        />
+        {dataIndex === 'dataType' ? (
+          <Select onChange={save} onBlur={save}>
+            <Select.Option value="INT">INT</Select.Option>
+            <Select.Option value="BOOL">BOOL</Select.Option>
+          </Select>
+        ) : (
+          <Input
+            ref={inputRef}
+            onPressEnter={save}
+            onBlur={save}
+            autoComplete="off"
+            disabled={dataIndex === 'defaultValue' && !record.dataType}
+          />
+        )}
       </Form.Item>
     ) : (
       <div

@@ -10,6 +10,8 @@ export const EditableContext = React.createContext<FormInstance<any> | null>(
 export const Errors = {
   required: 'required',
   repeated: 'already exists',
+  onlyInt32: 'only int32',
+  onlyBoolean: 'only boolean',
   noError: 'noError',
 } as const;
 export type ErrorsType = (typeof Errors)[keyof typeof Errors];

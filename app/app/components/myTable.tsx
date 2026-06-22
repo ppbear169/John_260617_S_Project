@@ -40,6 +40,16 @@ export const MyTable = () => {
       dataIndex: 'defaultValue',
       width: '20%',
       editable: true,
+      render: (_, record) => {
+        if (record.dataType === undefined) {
+          return '';
+        }
+
+        if (record.dataType === 'INT') {
+          return record.defaultValue;
+        }
+        return record.defaultValue?.toString() === 'true' ? 'TRUE' : 'FALSE';
+      },
     },
     {
       title: 'Comment',
@@ -77,12 +87,43 @@ export const MyTable = () => {
   };
 
   const handleValidate = (
-    value: string,
-    prevValue: string,
-    record: MyTypeSchema,
+    dataIndex: keyof MyTypeSchema,
+    prevValue: string | undefined,
+    newRecord: MyTypeSchema,
   ) => {
-    if (value !== prevValue) {
-      return Errors.repeated;
+    const newValue = newRecord[dataIndex] ?? '';
+    console.log('handleValidate', dataIndex, prevValue, newRecord);
+    switch (dataIndex) {
+      case 'name':
+        if (newValue === '') {
+          return Errors.required;
+        }
+
+        if (
+          dataSource
+            .filter((item) => item.key !== newRecord.key)
+            .some((item) => item.name === newValue)
+        ) {
+          return Errors.repeated;
+        }
+        break;
+      case 'defaultValue':
+        if (newValue === '') {
+          return Errors.required;
+        }
+
+        if (newRecord.dataType === 'INT' && !(Number(newValue) < 2147483648)) {
+          return Errors.onlyInt32;
+        }
+        if (
+          newRecord.dataType === 'BOOL' &&
+          !['true', 'false'].includes(newValue.toLocaleString())
+        ) {
+          return Errors.onlyBoolean;
+        }
+        break;
+      default:
+        break;
     }
     return Errors.noError;
   };
