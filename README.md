@@ -40,3 +40,5 @@ pnpm run dev
 http://localhost:5173
 
 ```
+
+### 4. 根目录下有个演示视频
