@@ -17,10 +17,10 @@ A demo for the given task
 
 在项目根目录下，进入数据层包并执行构建命令：
 
-````bash
+```bash
 cd packages/datalayer
 pnpm run build
-
+```
 
 ### 2. 安装依赖并启动应用
 
@@ -30,6 +30,7 @@ pnpm run build
 cd apps/app
 pnpm install
 pnpm run dev
+```
 
 ### 3. 访问应用
 
@@ -38,4 +39,4 @@ pnpm run dev
 ```bash
 http://localhost:5173
 
-````
+```
